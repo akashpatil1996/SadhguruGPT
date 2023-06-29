@@ -17,11 +17,11 @@ from langchain.embeddings import OpenAIEmbeddings
 
 
 
-embeddings = OpenAIEmbeddings(openai_api_key=openai_api, model='text-embedding-ada-002')
+embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API, model='text-embedding-ada-002')
 index_name = "for-langchain"
-pinecone.init(api_key=pinecone_api , environment=pinecone_env )
+pinecone.init(api_key=PINECONE_API , environment=PINECONE_ENV )
 index = pinecone.Index(index_name)
-embeddings = OpenAIEmbeddings(openai_api_key=openai_api, model='text-embedding-ada-002')
+embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API, model='text-embedding-ada-002')
 
 def get_conversation_string():
     conversation_string = ""
@@ -46,7 +46,7 @@ if 'responses' not in st.session_state:
 if 'requests' not in st.session_state:
     st.session_state['requests'] = []
 
-llm = ChatOpenAI(model_name="gpt-3.5-turbo", openai_api_key=openai_api)
+llm = ChatOpenAI(model_name="gpt-3.5-turbo", openai_api_key=OPENAI_API)
 
 if 'buffer_memory' not in st.session_state:
     st.session_state.buffer_memory = ConversationBufferWindowMemory(k=2, return_messages=True)
