@@ -39,7 +39,7 @@ def find_match(input):
 
 
 
-st.markdown("<h1 style='text-align: center;'>SahguruGPT 🧘</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center;'>SadhguruGPT 🧘</h1>", unsafe_allow_html=True)
 
 
 if 'responses' not in st.session_state:
