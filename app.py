@@ -15,7 +15,9 @@ from langchain.embeddings import OpenAIEmbeddings
 
 
 
-
+OPENAI_API = st.secrets["OPENAI_API"]
+PINECONE_API = st.secrets["PINECONE_API"]
+PINECONE_ENV = st.secrets["PINECONE_ENV"]
 
 embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API, model='text-embedding-ada-002')
 index_name = "for-langchain"
