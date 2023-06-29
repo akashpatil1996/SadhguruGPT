@@ -70,7 +70,7 @@ textcontainer = st.container()
 with textcontainer:
     query = st.text_input("Query: ", key="input")
     if query:
-        with st.spinner("typing..."):
+        with st.spinner("Loading..."):
             conversation_string = get_conversation_string()
             context = find_match(query)
             response = conversation.predict(input=f"Context:\n {context} \n\n Query:\n{query}")
