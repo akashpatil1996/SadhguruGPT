@@ -1,69 +1,83 @@
+from langchain.chat_models import ChatOpenAI
+from langchain.chains import ConversationChain
+from langchain.chains.conversation.memory import ConversationBufferWindowMemory
+from langchain.prompts import (
+    SystemMessagePromptTemplate,
+    HumanMessagePromptTemplate,
+    ChatPromptTemplate,
+    MessagesPlaceholder
+)
+import streamlit as st
+from streamlit_chat import message
 import pinecone
 from langchain.vectorstores import Pinecone
-from dotenv import load_dotenv
-# from langchain import OpenAI, LLMChain, PromptTemplate
-from langchain.memory import ConversationBufferWindowMemory
-from langchain.embeddings import OpenAIEmbeddings, HuggingFaceInstructEmbeddings
-from langchain.chat_models import ChatOpenAI
-from langchain.memory import ConversationBufferMemory
-from langchain.chains import ConversationalRetrievalChain
-from htmlTemplate import css, bot_template, user_template
-from langchain.llms import HuggingFaceHub
-import streamlit as st
-
-hug_embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
-
-def init_vectorstore():
-    pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_API_ENV)
-    index = pinecone.Index("for-langchain")
-    vectorstore = Pinecone(index, hug_embeddings.embed_query, "text")
-    return vectorstore
-
-def get_conversation_chain(vectorstore):
-    llm = ChatOpenAI()
-    memory = ConversationBufferMemory(
-        memory_key='chat_history', return_messages=True)
-    conversation_chain = ConversationalRetrievalChain.from_llm(
-        llm=llm,
-        retriever=vectorstore.as_retriever(),
-        memory=memory
-    )
-    return conversation_chain
-
-def handle_userinput(user_question):
-    response = st.session_state.conversation({'question': user_question})
-    st.session_state.chat_history = response['chat_history']
-
-    for i, message in enumerate(st.session_state.chat_history):
-        if i % 2 == 0:
-            st.write(user_template.replace(
-                "{{MSG}}", message.content), unsafe_allow_html=True)
-        else:
-            st.write(bot_template.replace(
-                "{{MSG}}", message.content), unsafe_allow_html=True)
+from langchain.embeddings import OpenAIEmbeddings
 
 
-def main():
-    load_dotenv()
-    st.set_page_config(page_title="Chat with Sadhguru",
-                       page_icon=":books:")
-    st.write(css, unsafe_allow_html=True)
 
-    if "conversation" not in st.session_state:
-        st.session_state.conversation = None
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = None
 
-    st.header("Chat with Sadhguru :books:")
-    user_question = st.text_input("Ask your question:")
-    if user_question:
-        handle_userinput(user_question)
 
-        # initialize vectorstore
-        vectorstore = init_vectorstore()
+embeddings = OpenAIEmbeddings(openai_api_key=openai_api, model='text-embedding-ada-002')
+index_name = "for-langchain"
+pinecone.init(api_key=pinecone_api , environment=pinecone_env )
+index = pinecone.Index(index_name)
+embeddings = OpenAIEmbeddings(openai_api_key=openai_api, model='text-embedding-ada-002')
 
-        # create conversation chain
-        st.session_state.conversation = get_conversation_chain(vectorstore)
+def get_conversation_string():
+    conversation_string = ""
+    for i in range(len(st.session_state['responses']) - 1):
+        conversation_string += "Human: " + st.session_state['requests'][i] + "\n"
+        conversation_string += "Sadhguru: " + st.session_state['responses'][i + 1] + "\n"
+    return conversation_string
 
-if __name__ == '__main__':
-    main()
+def find_match(input):
+    vectorstore = Pinecone(index, embeddings.embed_query, "text")
+    result = vectorstore.similarity_search(input, k=2)
+    return result
+
+
+
+st.markdown("<h1 style='text-align: center;'>SahguruGPT 🧘</h1>", unsafe_allow_html=True)
+
+
+if 'responses' not in st.session_state:
+    st.session_state['responses'] = ["Namaskaram🙏 Please ask your question"]
+
+if 'requests' not in st.session_state:
+    st.session_state['requests'] = []
+
+llm = ChatOpenAI(model_name="gpt-3.5-turbo", openai_api_key=openai_api)
+
+if 'buffer_memory' not in st.session_state:
+    st.session_state.buffer_memory = ConversationBufferWindowMemory(k=2, return_messages=True)
+
+system_msg_template = SystemMessagePromptTemplate.from_template(template="""Your name is SadhguruGPT, you are an AI ChatBot trained on Sadhguru's data. Sadhguru is a yogi, mystic and a sipritual guru, You have to answer the question with only the context provided and as truthfull as possible, and if the answer is not contained within the text below, say 'I don't know'. Context: """)
+
+human_msg_template = HumanMessagePromptTemplate.from_template(template="{input}")
+
+prompt_template = ChatPromptTemplate.from_messages(
+    [system_msg_template, MessagesPlaceholder(variable_name="history"), human_msg_template])
+
+conversation = ConversationChain(memory=st.session_state.buffer_memory, prompt=prompt_template, llm=llm, verbose=True)
+
+# container for chat history
+response_container = st.container()
+# container for text box
+textcontainer = st.container()
+
+with textcontainer:
+    query = st.text_input("Query: ", key="input")
+    if query:
+        with st.spinner("typing..."):
+            conversation_string = get_conversation_string()
+            context = find_match(query)
+            response = conversation.predict(input=f"Context:\n {context} \n\n Query:\n{query}")
+        st.session_state.requests.append(query)
+        st.session_state.responses.append(response)
+with response_container:
+    if st.session_state['responses']:
+
+        for i in range(len(st.session_state['responses'])):
+            message(st.session_state['responses'][i], key=str(i))
+            if i < len(st.session_state['requests']):
+                message(st.session_state["requests"][i], is_user=True, key=str(i) + '_user')
