@@ -41,7 +41,7 @@ def find_match(input):
 
 
 st.markdown("<h1 style='text-align: center;'>SadhguruGPT 🧘</h1>", unsafe_allow_html=True)
-st.caption("AI-Chatbot trained on the wisdom of Sadhguru. It provides responses inspired by his books and discourses.")
+st.markdown("<h3 style='text-align: center;'>AI-Chatbot trained on the wisdom and teachings of Sadhguru. It provides responses inspired by his books and discourses.</h3>", unsafe_allow_html=True)
 
 if 'responses' not in st.session_state:
     st.session_state['responses'] = ["Namaskaram🙏 Please ask your question"]
