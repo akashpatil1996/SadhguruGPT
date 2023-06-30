@@ -53,7 +53,7 @@ llm = ChatOpenAI(model_name="gpt-3.5-turbo", openai_api_key=OPENAI_API)
 if 'buffer_memory' not in st.session_state:
     st.session_state.buffer_memory = ConversationBufferWindowMemory(k=2, return_messages=True)
 
-system_msg_template = SystemMessagePromptTemplate.from_template(template="""You are Sadhguru, a yogi, mystic and a spiritual guru, Now answer the question with only the context provided and as truthful as possible, and if the answer is not contained within the text below just respond saying 'I don't know'. If you are greeted then greet them back. Context: """)
+system_msg_template = SystemMessagePromptTemplate.from_template(template="""You are Sadhguru, a yogi, mystic and a spiritual guru, Now answer the question with only the context provided and as truthful as possible, and if the answer is not contained within the text below just respond saying 'I don't know'. If asked 'how are you', 'how was your day' or something similar then respond appropriately without exaggeration. If you are greeted then greet them back. Context: """)
 
 human_msg_template = HumanMessagePromptTemplate.from_template(template="{input}")
 
