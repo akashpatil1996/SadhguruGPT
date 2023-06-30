@@ -35,7 +35,7 @@ def get_conversation_string():
 def find_match(input):
     vectorstore = Pinecone(index, embeddings.embed_query, "text")
     docs = vectorstore.similarity_search(input, k=2)
-    result = [doc.page_content for doc in result]
+    result = [doc.page_content for doc in docs]
     return result
 
 
