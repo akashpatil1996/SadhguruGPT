@@ -20,7 +20,7 @@ PINECONE_API = st.secrets["PINECONE_API"]
 PINECONE_ENV = st.secrets["PINECONE_ENV"]
 
 embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API, model='text-embedding-ada-002')
-index_name = "for-langchain"
+index_name = "for-langchain-index"
 pinecone.init(api_key=PINECONE_API , environment=PINECONE_ENV )
 index = pinecone.Index(index_name)
 embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API, model='text-embedding-ada-002')
